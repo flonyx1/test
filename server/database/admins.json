@@ -1,0 +1,16 @@
+[
+  {
+    "id": "76b3c610-167c-4008-a748-385a53fe37f2",
+    "ip": "127.0.0.1",
+    "name": "Local Admin",
+    "active": true,
+    "createdAt": "2025-06-22T11:06:09.401Z"
+  },
+  {
+    "id": "89d4e721-278d-5119-b859-496b64ge48g3",
+    "ip": "5.253.42.8",
+    "name": "Snervox",
+    "active": true,
+    "createdAt": "2025-06-22T11:06:09.401Z"
+  }
+]
