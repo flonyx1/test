@@ -11,20 +11,19 @@ export default function Profile() {
   });
 
   const handleSave = () => {
-    console.log('Сохранение профиля:', editData);
     setIsEditing(false);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      console.log('Загрузка аватара:', file);
     }
   };
 
   return (
     <div className="h-full overflow-y-auto bg-dark-800/30">
       <div className="max-w-2xl mx-auto p-6">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-white">Профиль</h1>
           <button
