@@ -152,7 +152,7 @@ export default function AdminPanel() {
             <Shield className="w-8 h-8 text-red-400" />
             <div>
               <h1 className="text-3xl font-bold text-white">Админ-панель</h1>
-              <p className="text-primary-300">Управление системой APE</p>
+              <p className="text-primary-300">Управление системой SecureChat</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 text-green-400">
