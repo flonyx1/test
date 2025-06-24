@@ -24,14 +24,15 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL] 
+      ? [process.env.FRONTEND_URL || "https://your-app.up.railway.app"] 
       : ["http://localhost:5173", "http://127.0.0.1:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   }
 });
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'secure-chat-jwt-secret-2024';
+const PORT = process.env.PORT || 3001;
 const DB_PATH = path.join(__dirname, 'database');
 
 app.use(antiDDoS);
@@ -39,12 +40,17 @@ app.use(checkBlockedCountries);
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL] 
+    ? [process.env.FRONTEND_URL || "https://your-app.up.railway.app"] 
     : ["http://localhost:5173", "http://127.0.0.1:5173"],
   credentials: true
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../dist')));
+}
 
 async function initDatabase() {
   try {
@@ -68,14 +74,14 @@ async function initDatabase() {
         {
           id: uuidv4(),
           ip: '127.0.0.1',
-          name: 'Local Admin',
+          name: 'Localhost Admin',
           active: true,
           createdAt: new Date().toISOString()
         },
         {
           id: uuidv4(),
           ip: '5.253.42.8',
-          name: 'Snervox',
+          name: 'Remote Admin',
           active: true,
           createdAt: new Date().toISOString()
         }
@@ -136,6 +142,14 @@ function getMoscowTime() {
     second: '2-digit'
   });
 }
+
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'SecureChat API is running',
+    timestamp: new Date().toISOString()
+  });
+});
 
 app.get('/api/admin/check', async (req, res) => {
   try {
@@ -476,6 +490,12 @@ app.get('/api/messages/:chatId', authenticateToken, async (req, res) => {
   }
 });
 
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  });
+}
+
 const connectedUsers = new Map();
 
 io.on('connection', (socket) => {
@@ -519,14 +539,17 @@ io.on('connection', (socket) => {
       }
       
       const chat = chats[chatIndex];
-      chat.participants.forEach(participantId => {
-        const socketId = connectedUsers.get(participantId);
-        if (socketId) {
-          io.to(socketId).emit('new-message', newMessage);
-        }
-      });
+      if (chat) {
+        chat.participants.forEach(participantId => {
+          const socketId = connectedUsers.get(participantId);
+          if (socketId) {
+            io.to(socketId).emit('new-message', newMessage);
+          }
+        });
+      }
       
     } catch (error) {
+      socket.emit('message-error', { error: 'Ошибка отправки сообщения' });
     }
   });
 
@@ -575,7 +598,8 @@ io.on('connection', (socket) => {
 });
 
 initDatabase().then(() => {
-  const PORT = process.env.PORT || 3001;
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
+    if (process.env.NODE_ENV !== 'production') {
+    }
   });
 });
